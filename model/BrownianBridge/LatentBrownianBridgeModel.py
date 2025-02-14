@@ -87,7 +87,8 @@ class LatentBrownianBridgeModel(BrownianBridgeModel):
         return x_latent
 
     @torch.no_grad()
-    def decode(self, x_latent, cond=True, normalize=None):
+   @torch.no_grad()
+   def decode(self, x_latent, cond=True, normalize=None):
         normalize = self.model_config.normalize_latent if normalize is None else normalize
         if normalize:
             if cond:
@@ -97,13 +98,16 @@ class LatentBrownianBridgeModel(BrownianBridgeModel):
         x_latent = self.latent_proj(x_latent)
         x_stats = self.decoder_dalle(x_latent).float()
         x_rec = unmap_pixels(torch.sigmoid(x_stats[:, :3]))
-        x_rec = T.ToPILImage(mode='RGB')(x_rec[0])        
-        # model = self.vqgan
-        # if self.model_config.latent_before_quant_conv:
-        #     x_latent = model.quant_conv(x_latent)
-        # x_latent_quant, loss, _ = model.quantize(x_latent)
-        # out = model.decode(x_latent_quant)
-        return x_rec 
+        # Remove the PIL conversion so that a tensor is returned.
+        # Optionally, if you want a single image tensor, use x_rec[0]
+        return x_rec
+  
+    # model = self.vqgan
+    # if self.model_config.latent_before_quant_conv:
+    #     x_latent = model.quant_conv(x_latent)
+    # x_latent_quant, loss, _ = model.quantize(x_latent)
+    # out = model.decode(x_latent_quant)
+        
 
     @torch.no_grad()
     def sample(self, x_cond, clip_denoised=False, sample_mid_step=False):
