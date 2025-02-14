@@ -27,7 +27,7 @@ class LatentBrownianBridgeModel(BrownianBridgeModel):
         for param in self.vqgan.parameters():
             param.requires_grad = False
         print(f"load vqgan from {model_config.VQGAN.params.ckpt_path}")
-
+        self.latent_proj = nn.Conv2d(128, 8192, kernel_size=1)
         # Condition Stage Model
         if self.condition_key == 'nocond':
             self.cond_stage_model = None
@@ -94,7 +94,7 @@ class LatentBrownianBridgeModel(BrownianBridgeModel):
                 x_latent = x_latent * self.cond_latent_std + self.cond_latent_mean
             else:
                 x_latent = x_latent * self.ori_latent_std + self.ori_latent_mean
-
+        x_latent = self.latent_proj(x_latent)
         x_stats = self.decoder_dalle(x_latent).float()
         x_rec = unmap_pixels(torch.sigmoid(x_stats[:, :3]))
         x_rec = T.ToPILImage(mode='RGB')(x_rec[0])        
