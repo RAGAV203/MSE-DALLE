@@ -86,8 +86,8 @@ class LatentBrownianBridgeModel(BrownianBridgeModel):
                 x_latent = (x_latent - self.ori_latent_mean) / self.ori_latent_std
         return x_latent
 
-   @torch.no_grad()
-   def decode(self, x_latent, cond=True, normalize=None):
+    @torch.no_grad()
+    def decode(self, x_latent, cond=True, normalize=None):
         normalize = self.model_config.normalize_latent if normalize is None else normalize
         if normalize:
             if cond:
